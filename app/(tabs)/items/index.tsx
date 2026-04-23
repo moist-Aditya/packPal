@@ -7,8 +7,8 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-
 import { searchItems } from '@/db/helpers/items';
+import { theme } from '@/theme'; // Importing your dark theme
 
 export default function ItemsScreen() {
   const router = useRouter();
@@ -18,7 +18,6 @@ export default function ItemsScreen() {
 
   const handleSearch = async (text: string) => {
     setQuery(text);
-
     const res = await searchItems(text);
     setItems(res);
   };
@@ -28,54 +27,112 @@ export default function ItemsScreen() {
   }, []);
 
   return (
-    <View style={{ flex: 1, padding: 16 }}>
-      {/* 🔍 Search */}
-      <TextInput
-        placeholder="Search items..."
-        value={query}
-        onChangeText={handleSearch}
-        style={{
-          borderWidth: 1,
-          borderColor: '#ccc',
-          padding: 10,
-          borderRadius: 10,
-          marginBottom: 16,
-        }}
-      />
+    <View style={{ flex: 1, backgroundColor: theme.colors.background, padding: theme.spacing.m }}>
+      {/* 🔍 Modern Search Bar */}
+      <View style={{ marginBottom: 20 }}>
+        <TextInput
+          placeholder="Search all items..."
+          placeholderTextColor="#666"
+          value={query}
+          onChangeText={handleSearch}
+          style={{
+            backgroundColor: theme.colors.surface,
+            borderWidth: 1,
+            borderColor: theme.colors.border,
+            padding: 16,
+            borderRadius: 14,
+            color: theme.colors.textPrimary,
+            fontSize: 16,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 4,
+            elevation: 2,
+          }}
+        />
+      </View>
 
       {/* 📦 List */}
       {items.length === 0 ? (
-        <View style={{ alignItems: 'center', marginTop: 40 }}>
-          <Text>No items found</Text>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <Text style={{ color: theme.colors.textSecondary, fontSize: 16 }}>
+            No items match your search 🔎
+          </Text>
         </View>
       ) : (
         <FlatList
           data={items}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={{ gap: 10 }}
+          keyExtractor={(item) => item.id.toString()}
+          contentContainerStyle={{ gap: 12, paddingBottom: 20 }}
+          showsVerticalScrollIndicator={false}
           renderItem={({ item }) => (
             <TouchableOpacity
+              activeOpacity={0.8}
               onPress={() => router.push(`/boxes/${item.boxId}`)}
             >
               <View
                 style={{
-                  padding: 12,
-                  backgroundColor: '#f2f2f2',
-                  borderRadius: 8,
+                  padding: 16,
+                  backgroundColor: theme.colors.surface,
+                  borderRadius: 16,
+                  borderWidth: 1,
+                  borderColor: theme.colors.border,
                 }}
               >
-                <Text style={{ fontWeight: '600' }}>
-                  {item.name} (x{item.quantity})
-                </Text>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Text style={{
+                    fontWeight: '700',
+                    fontSize: 17,
+                    color: theme.colors.textPrimary
+                  }}>
+                    {item.name}
+                  </Text>
+                  <Text style={{
+                    color: theme.colors.accent,
+                    fontWeight: '700',
+                    fontSize: 14
+                  }}>
+                    x{item.quantity}
+                  </Text>
+                </View>
 
-                <Text style={{ color: '#666' }}>
-                  📦 {item.boxLabel}
-                </Text>
+                <View style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  marginTop: 8,
+                  gap: 6
+                }}>
+                  <Text style={{ fontSize: 14, color: theme.colors.primary }}>📦</Text>
+                  <Text style={{
+                    color: theme.colors.textSecondary,
+                    fontSize: 14,
+                    fontWeight: '500'
+                  }}>
+                    In {item.boxLabel}
+                  </Text>
+                </View>
 
                 {item.isEssential && (
-                  <Text style={{ color: 'red', marginTop: 4 }}>
-                    Essential
-                  </Text>
+                  <View style={{
+                    marginTop: 10,
+                    backgroundColor: theme.colors.accent + '15',
+                    alignSelf: 'flex-start',
+                    paddingHorizontal: 8,
+                    paddingVertical: 3,
+                    borderRadius: 6,
+                    borderWidth: 1,
+                    borderColor: theme.colors.accent + '30'
+                  }}>
+                    <Text style={{
+                      color: theme.colors.accent,
+                      fontSize: 10,
+                      fontWeight: '800',
+                      textTransform: 'uppercase',
+                      letterSpacing: 0.5
+                    }}>
+                      Essential
+                    </Text>
+                  </View>
                 )}
               </View>
             </TouchableOpacity>
