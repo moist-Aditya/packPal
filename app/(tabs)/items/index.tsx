@@ -9,6 +9,9 @@ import {
 import { useRouter } from 'expo-router';
 import { searchItems } from '@/db/helpers/items';
 import { theme } from '@/theme'; // Importing your dark theme
+import { useFocusEffect } from 'expo-router';
+import { useCallback } from 'react';
+import { useDebounce } from '@/utils/useDebounce';
 
 export default function ItemsScreen() {
   const router = useRouter();
@@ -17,14 +20,21 @@ export default function ItemsScreen() {
   const [items, setItems] = useState<any[]>([]);
 
   const handleSearch = async (text: string) => {
-    setQuery(text);
     const res = await searchItems(text);
     setItems(res);
   };
 
+  const debouncedQuery = useDebounce(query, 300);
+
   useEffect(() => {
-    handleSearch('');
-  }, []);
+    handleSearch(debouncedQuery);
+  }, [debouncedQuery]);
+
+  useFocusEffect(
+    useCallback(() => {
+      handleSearch(query);
+    }, [query])
+  );
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background, padding: theme.spacing.m }}>
@@ -34,7 +44,7 @@ export default function ItemsScreen() {
           placeholder="Search all items..."
           placeholderTextColor="#666"
           value={query}
-          onChangeText={handleSearch}
+          onChangeText={setQuery}
           style={{
             backgroundColor: theme.colors.surface,
             borderWidth: 1,
@@ -63,7 +73,7 @@ export default function ItemsScreen() {
         <FlatList
           data={items}
           keyExtractor={(item) => item.id.toString()}
-          contentContainerStyle={{ gap: 12, paddingBottom: 20 }}
+          contentContainerStyle={{ gap: 12, paddingBottom: 80 }}
           showsVerticalScrollIndicator={false}
           renderItem={({ item }) => (
             <TouchableOpacity
