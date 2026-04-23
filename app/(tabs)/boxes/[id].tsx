@@ -7,6 +7,8 @@ import { getBoxById } from '@/db/helpers/boxes';
 import { getItemsByBoxId } from '@/db/helpers/items';
 import { toggleBoxUnpacked } from '@/db/helpers/boxes';
 import { theme } from '@/theme'; // Import your theme
+import { deleteItem } from '@/db/helpers/items';
+import { Alert } from 'react-native';
 
 export default function BoxDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -32,6 +34,25 @@ export default function BoxDetailScreen() {
       fetchData();
     }, [id])
   );
+
+  // Handler to delete an item
+  const handleDelete = (itemId: string) => {
+    Alert.alert(
+      'Delete Item',
+      'Are you sure you want to delete this item?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            await deleteItem(itemId);
+            setItems((prev) => prev.filter((i) => i.id !== itemId));
+          },
+        },
+      ]
+    );
+  };
 
   if (!box) {
     return (
@@ -162,46 +183,98 @@ export default function BoxDetailScreen() {
                   backgroundColor: theme.colors.surface,
                   borderRadius: 16,
                   borderLeftWidth: item.isEssential ? 4 : 0,
-                  borderLeftColor: theme.colors.accent, // Walnut highlight for essentials
+                  borderLeftColor: theme.colors.accent, // Walnut highlight
+                  borderWidth: 1,
+                  borderColor: theme.colors.border,
                 }}>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                {/* Top Row: Name and Quantity */}
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                   <Text style={{
-                    fontWeight: '600',
-                    fontSize: 16,
-                    color: theme.colors.textPrimary
+                    fontWeight: '700',
+                    fontSize: 17,
+                    color: theme.colors.textPrimary,
+                    flex: 1, // Ensures text wraps if long
                   }}>
                     {item.name}
                   </Text>
-                  <Text style={{ color: theme.colors.accent, fontWeight: '700' }}>
+                  <Text style={{
+                    color: theme.colors.accent,
+                    fontWeight: '800',
+                    fontSize: 15,
+                    marginLeft: 8
+                  }}>
                     x{item.quantity}
                   </Text>
                 </View>
 
+                {/* Description */}
                 {item.description && (
-                  <Text style={{ color: theme.colors.textSecondary, marginTop: 4, fontSize: 14 }}>
+                  <Text style={{
+                    color: theme.colors.textSecondary,
+                    marginTop: 6,
+                    fontSize: 14,
+                    lineHeight: 20
+                  }}>
                     {item.description}
                   </Text>
                 )}
 
-                {item.isEssential && (
-                  <View style={{
-                    marginTop: 8,
-                    backgroundColor: theme.colors.accent + '15',
-                    alignSelf: 'flex-start',
-                    paddingHorizontal: 8,
-                    paddingVertical: 2,
-                    borderRadius: 4
-                  }}>
-                    <Text style={{
-                      color: theme.colors.accent,
-                      fontSize: 10,
-                      fontWeight: '800',
-                      textTransform: 'uppercase'
-                    }}>
-                      Essential
-                    </Text>
+                {/* Bottom Row: Essential Badge & Delete Action */}
+                <View style={{
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  alignItems: 'flex-end',
+                  marginTop: 12
+                }}>
+                  {/* Essential Badge */}
+                  <View style={{ flex: 1 }}>
+                    {item.isEssential && (
+                      <View style={{
+                        backgroundColor: theme.colors.accent + '15',
+                        alignSelf: 'flex-start',
+                        paddingHorizontal: 10,
+                        paddingVertical: 4,
+                        borderRadius: 6,
+                        borderWidth: 1,
+                        borderColor: theme.colors.accent + '25'
+                      }}>
+                        <Text style={{
+                          color: theme.colors.accent,
+                          fontSize: 10,
+                          fontWeight: '800',
+                          textTransform: 'uppercase',
+                          letterSpacing: 0.5
+                        }}>
+                          Essential
+                        </Text>
+                      </View>
+                    )}
                   </View>
-                )}
+
+                  {/* Modern Delete Button */}
+                  <TouchableOpacity
+                    onPress={() => handleDelete(item.id)}
+                    activeOpacity={0.6}
+                    style={{
+                      paddingHorizontal: 12,
+                      paddingVertical: 6,
+                      backgroundColor: '#FF525215', // Subtle red tint
+                      borderRadius: 8,
+                      borderWidth: 1,
+                      borderColor: '#FF525230'
+                    }}
+                  >
+                    <Text style={{
+                      color: '#FF5252',
+                      fontWeight: '700',
+                      fontSize: 12,
+                      textTransform: 'uppercase',
+                      letterSpacing: 0.5
+                    }}>
+                      Remove
+                    </Text>
+                  </TouchableOpacity>
+                </View>
               </View>
             )}
           />

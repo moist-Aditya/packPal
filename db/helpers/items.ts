@@ -32,3 +32,7 @@ export async function searchItems(query: string) {
     .leftJoin(boxes, eq(items.boxId, boxes.id))
     .where(sql`LOWER(${items.name}) LIKE LOWER(${`%${query}%`})`);
 }
+
+export async function deleteItem(id: string) {
+  await db.delete(items).where(eq(items.id, id));
+}
