@@ -29,3 +29,7 @@ export async function toggleBoxUnpacked(id: string, value: boolean) {
     .set({ isUnpacked: value })
     .where(eq(boxes.id, id));
 }
+
+export async function deleteBox(id: string) {
+  await db.delete(boxes).where(eq(boxes.id, id));
+}

@@ -8,6 +8,7 @@ import { getItemsByBoxId } from '@/db/helpers/items';
 import { toggleBoxUnpacked } from '@/db/helpers/boxes';
 import { theme } from '@/theme'; // Import your theme
 import { deleteItem } from '@/db/helpers/items';
+import { deleteBox } from '@/db/helpers/boxes';
 import { Alert } from 'react-native';
 
 export default function BoxDetailScreen() {
@@ -54,6 +55,25 @@ export default function BoxDetailScreen() {
     );
   };
 
+  // Handler to delete the box
+  const handleDeleteBox = () => {
+    Alert.alert(
+      'Delete Box',
+      'This will delete the box and ALL its items. This cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            await deleteBox(id);
+            router.back(); // go back to boxes list
+          },
+        },
+      ]
+    );
+  };
+
   if (!box) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: theme.colors.background }}>
@@ -66,7 +86,7 @@ export default function BoxDetailScreen() {
     <>
       <Stack.Screen
         options={{
-          headerTitle: '', // Keep header clean; we show label in the body
+          headerTitle: '',
           headerRight: () => (
             <TouchableOpacity
               onPress={() => router.push(`/boxes/${id}/add-item`)}
@@ -150,135 +170,111 @@ export default function BoxDetailScreen() {
           Items ({items.length})
         </Text>
 
-        {items.length === 0 ? (
-          <View style={{
-            flex: 1,
-            marginTop: 40,
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 16
-          }}>
-            <Text style={{ color: theme.colors.textSecondary, fontSize: 16 }}>This box is empty</Text>
-            <TouchableOpacity
-              onPress={() => router.push(`/boxes/${id}/add-item`)}
-              style={{
-                backgroundColor: theme.colors.accent,
-                paddingVertical: 12,
-                paddingHorizontal: 24,
-                borderRadius: theme.borderRadius,
-              }}>
-              <Text style={{ color: theme.colors.background, fontWeight: '700' }}>Add First Item</Text>
-            </TouchableOpacity>
-          </View>
-        ) : (
-          <FlatList
-            data={items}
-            keyExtractor={(item) => item.id.toString()}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ gap: 12, paddingBottom: 80 }}
-            renderItem={({ item }) => (
-              <View
+        <FlatList
+          data={items}
+          keyExtractor={(item) => item.id.toString()}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ gap: 12, paddingBottom: 100 }} // Extra padding for the delete button
+          ListEmptyComponent={
+            <View style={{ marginTop: 40, alignItems: 'center', gap: 16 }}>
+              <Text style={{ color: theme.colors.textSecondary, fontSize: 16 }}>This box is empty</Text>
+              <TouchableOpacity
+                onPress={() => router.push(`/boxes/${id}/add-item`)}
                 style={{
-                  padding: 16,
-                  backgroundColor: theme.colors.surface,
-                  borderRadius: 16,
-                  borderLeftWidth: item.isEssential ? 4 : 0,
-                  borderLeftColor: theme.colors.accent, // Walnut highlight
-                  borderWidth: 1,
-                  borderColor: theme.colors.border,
+                  backgroundColor: theme.colors.accent,
+                  paddingVertical: 12,
+                  paddingHorizontal: 24,
+                  borderRadius: theme.borderRadius,
                 }}>
-                {/* Top Row: Name and Quantity */}
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Text style={{
-                    fontWeight: '700',
-                    fontSize: 17,
-                    color: theme.colors.textPrimary,
-                    flex: 1, // Ensures text wraps if long
-                  }}>
-                    {item.name}
-                  </Text>
-                  <Text style={{
-                    color: theme.colors.accent,
-                    fontWeight: '800',
-                    fontSize: 15,
-                    marginLeft: 8
-                  }}>
-                    x{item.quantity}
-                  </Text>
-                </View>
-
-                {/* Description */}
-                {item.description && (
-                  <Text style={{
-                    color: theme.colors.textSecondary,
-                    marginTop: 6,
-                    fontSize: 14,
-                    lineHeight: 20
-                  }}>
-                    {item.description}
-                  </Text>
-                )}
-
-                {/* Bottom Row: Essential Badge & Delete Action */}
-                <View style={{
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  alignItems: 'flex-end',
-                  marginTop: 12
-                }}>
-                  {/* Essential Badge */}
-                  <View style={{ flex: 1 }}>
-                    {item.isEssential && (
-                      <View style={{
-                        backgroundColor: theme.colors.accent + '15',
-                        alignSelf: 'flex-start',
-                        paddingHorizontal: 10,
-                        paddingVertical: 4,
-                        borderRadius: 6,
-                        borderWidth: 1,
-                        borderColor: theme.colors.accent + '25'
-                      }}>
-                        <Text style={{
-                          color: theme.colors.accent,
-                          fontSize: 10,
-                          fontWeight: '800',
-                          textTransform: 'uppercase',
-                          letterSpacing: 0.5
-                        }}>
-                          Essential
-                        </Text>
-                      </View>
-                    )}
-                  </View>
-
-                  {/* Modern Delete Button */}
-                  <TouchableOpacity
-                    onPress={() => handleDelete(item.id)}
-                    activeOpacity={0.6}
-                    style={{
-                      paddingHorizontal: 12,
-                      paddingVertical: 6,
-                      backgroundColor: '#FF525215', // Subtle red tint
-                      borderRadius: 8,
-                      borderWidth: 1,
-                      borderColor: '#FF525230'
-                    }}
-                  >
-                    <Text style={{
-                      color: '#FF5252',
-                      fontWeight: '700',
-                      fontSize: 12,
-                      textTransform: 'uppercase',
-                      letterSpacing: 0.5
-                    }}>
-                      Remove
-                    </Text>
-                  </TouchableOpacity>
-                </View>
+                <Text style={{ color: theme.colors.background, fontWeight: '700' }}>Add First Item</Text>
+              </TouchableOpacity>
+            </View>
+          }
+          renderItem={({ item }) => (
+            <View
+              style={{
+                padding: 16,
+                backgroundColor: theme.colors.surface,
+                borderRadius: 16,
+                borderLeftWidth: item.isEssential ? 4 : 0,
+                borderLeftColor: theme.colors.accent,
+                borderWidth: 1,
+                borderColor: theme.colors.border,
+              }}>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Text style={{ fontWeight: '700', fontSize: 17, color: theme.colors.textPrimary, flex: 1 }}>
+                  {item.name}
+                </Text>
+                <Text style={{ color: theme.colors.accent, fontWeight: '800', fontSize: 15, marginLeft: 8 }}>
+                  x{item.quantity}
+                </Text>
               </View>
-            )}
-          />
-        )}
+
+              {item.description && (
+                <Text style={{ color: theme.colors.textSecondary, marginTop: 6, fontSize: 14, lineHeight: 20 }}>
+                  {item.description}
+                </Text>
+              )}
+
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: 12 }}>
+                <View style={{ flex: 1 }}>
+                  {item.isEssential && (
+                    <View style={{
+                      backgroundColor: theme.colors.accent + '15',
+                      alignSelf: 'flex-start',
+                      paddingHorizontal: 10,
+                      paddingVertical: 4,
+                      borderRadius: 6,
+                      borderWidth: 1,
+                      borderColor: theme.colors.accent + '25'
+                    }}>
+                      <Text style={{ color: theme.colors.accent, fontSize: 10, fontWeight: '800', textTransform: 'uppercase' }}>
+                        Essential
+                      </Text>
+                    </View>
+                  )}
+                </View>
+
+                <TouchableOpacity
+                  onPress={() => handleDelete(item.id)}
+                  style={{
+                    paddingHorizontal: 12,
+                    paddingVertical: 6,
+                    backgroundColor: '#FF525215',
+                    borderRadius: 8,
+                    borderWidth: 1,
+                    borderColor: '#FF525230'
+                  }}
+                >
+                  <Text style={{ color: '#FF5252', fontWeight: '700', fontSize: 12, textTransform: 'uppercase' }}>
+                    Remove
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
+          // --- FOOTER: DELETE BOX BUTTON ---
+          ListFooterComponent={
+            <TouchableOpacity
+              onPress={handleDeleteBox}
+              activeOpacity={0.7}
+              style={{
+                marginTop: 32,
+                marginBottom: 40,
+                padding: 16,
+                backgroundColor: 'transparent',
+                borderRadius: theme.borderRadius,
+                borderWidth: 1.5,
+                borderColor: '#FF525240', // Muted red border
+                alignItems: 'center',
+              }}
+            >
+              <Text style={{ color: '#FF5252', fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1 }}>
+                Delete Entire Box
+              </Text>
+            </TouchableOpacity>
+          }
+        />
       </View>
     </>
   );
