@@ -5,6 +5,8 @@ import { useFocusEffect } from 'expo-router';
 
 import { getBoxById } from '@/db/helpers/boxes';
 import { getItemsByBoxId } from '@/db/helpers/items';
+import { Switch } from 'react-native';
+import { toggleBoxUnpacked } from '@/db/helpers/boxes';
 
 export default function BoxDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -60,7 +62,26 @@ export default function BoxDetailScreen() {
 
         {box.category && <Text style={{ color: '#666' }}>{box.category}</Text>}
 
-        <Text style={{ marginTop: 6 }}>Status: {box.isUnpacked ? 'Unpacked' : 'Packed'}</Text>
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginTop: 10,
+          }}
+        >
+          <Text style={{ fontSize: 16 }}>
+            {box.isUnpacked ? 'Unpacked' : 'Packed'}
+          </Text>
+
+          <Switch
+            value={box.isUnpacked}
+            onValueChange={async (val) => {
+              await toggleBoxUnpacked(id, val);
+              setBox({ ...box, isUnpacked: val }); // instant UI update
+            }}
+          />
+        </View>
 
         {/* Items */}
         {items.length === 0 ? (

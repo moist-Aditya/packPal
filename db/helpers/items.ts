@@ -1,6 +1,6 @@
 import { db } from '../index';
-import { items } from '../schema';
-import { eq } from 'drizzle-orm';
+import { items, boxes } from '../schema';
+import { eq, sql } from 'drizzle-orm';
 
 export async function getItemsByBoxId(boxId: string) {
   return await db.select().from(items).where(eq(items.boxId, boxId));
@@ -16,4 +16,19 @@ export async function createItem(data: {
   createdAt: Date;
 }) {
   await db.insert(items).values(data);
+}
+
+export async function searchItems(query: string) {
+  return await db
+    .select({
+      id: items.id,
+      name: items.name,
+      quantity: items.quantity,
+      isEssential: items.isEssential,
+      boxId: items.boxId,
+      boxLabel: boxes.label,
+    })
+    .from(items)
+    .leftJoin(boxes, eq(items.boxId, boxes.id))
+    .where(sql`LOWER(${items.name}) LIKE LOWER(${`%${query}%`})`);
 }

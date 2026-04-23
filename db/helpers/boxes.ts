@@ -22,3 +22,10 @@ export async function getBoxById(id: string) {
   const res = await db.select().from(boxes).where(eq(boxes.id, id));
   return res[0];
 }
+
+export async function toggleBoxUnpacked(id: string, value: boolean) {
+  await db
+    .update(boxes)
+    .set({ isUnpacked: value })
+    .where(eq(boxes.id, id));
+}
