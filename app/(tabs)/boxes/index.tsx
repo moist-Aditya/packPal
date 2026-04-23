@@ -89,8 +89,14 @@ export default function BoxesScreen() {
 
               {item.category && <Text style={{ color: '#666' }}>{item.category}</Text>}
 
-              <Text style={{ marginTop: 6 }}>
-                Status: {item.isUnpacked ? 'Unpacked' : 'Packed'}
+              <Text
+                style={{
+                  marginTop: 6,
+                  color: item.isUnpacked ? 'green' : 'orange',
+                  fontWeight: '500',
+                }}
+              >
+                {item.isUnpacked ? 'Unpacked' : 'Packed'}
               </Text>
 
               <Text style={{ fontSize: 12, color: '#999', marginTop: 4 }}>

@@ -10,7 +10,6 @@ export const unstable_settings = {
 
 import { useEffect } from 'react';
 import { initDB } from '@/db/migrate';
-import { runTest } from '@/db/test';
 
 function RootStack() {
   useEffect(() => {
