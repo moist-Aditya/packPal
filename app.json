@@ -3,31 +3,28 @@
     "name": "pack-pal",
     "slug": "pack-pal",
     "version": "1.0.0",
-    
-    
-      "scheme": "pack-pal",
-      "platforms": ["ios", "android"],
-      "web": {
-        "bundler": "metro",
-        "output": "static",
-        "favicon": "./assets/favicon.png"
-      },
-      "plugins": [
-      "expo-router"
-      
+    "scheme": "pack-pal",
+    "platforms": [
+      "ios",
+      "android"
     ],
-      "experiments": {
-        "typedRoutes": true
-        
-          ,"tsconfigPaths": true
-        
-      },
-    
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-sqlite",
+      "expo-font"
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "tsconfigPaths": true
+    },
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    
-     "userInterfaceStyle": "light",
-    
+    "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
@@ -43,6 +40,13 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
+      },
+      "package": "com.aditya221210011.packpal"
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "e539d0f7-baae-4735-b86c-2e29a9442687"
       }
     }
   }
