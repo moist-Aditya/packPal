@@ -7,10 +7,17 @@ import { StatusBar } from 'expo-status-bar';
 import { initDB } from '@/db/migrate';
 import { theme } from '@/theme'; // Importing your custom theme
 import { ActivityIndicator, View } from 'react-native';
+import * as SplashScreen from 'expo-splash-screen';
 
 export const unstable_settings = {
   initialRouteName: '(tabs)',
 };
+
+// Set the animation options. This is optional.
+SplashScreen.setOptions({
+  duration: 1000,
+  fade: true,
+});
 
 function RootStack() {
   const [ready, setReady] = useState(false);
